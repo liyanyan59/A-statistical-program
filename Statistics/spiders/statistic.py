@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import re
-import tkinter
+
 import scrapy
 from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
@@ -8,22 +7,21 @@ import time
 from scrapy.selector import Selector
 from tkinter import *
 
+from Statistics.util.tools import get_product_id
+
+
 class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
-    start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?productId=32956338726'
-                  '&ownerMemberId=235021169&companyId=244265688&memberType=seller&startValidDate=&i18n=true']
 
-    top = Tk()
-    L1 = Label(top, text="网站名")
-    L1.pack(side=LEFT)
-    E1 = Entry(top, bd=5)
-    start = E1.get()
-    E1.pack(side=RIGHT)
+    def __init__(self):
 
-    top.mainloop()
-    driver = webdriver.PhantomJS()
-    driver.get(start_urls[0])
+        productId = get_product_id()
+        self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
+                           'productId=%s&ownerMemberId=235021169' % productId]
+
+        driver = webdriver.PhantomJS()
+        driver.get(self.start_urls[0])
 
     def parse(self, response):
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
@@ -43,7 +41,6 @@ class StatisticSpider(scrapy.Spider):
             # 国家
             countries = response.xpath('//div[@class="user-country"]/b/text()').extract()
             for i in range(10):
-
                 item = Item()
 
                 # 容量
@@ -79,9 +76,3 @@ class StatisticSpider(scrapy.Spider):
             response = Selector(text=response)
 
         self.driver.close()
-
-
-
-
-
-
