@@ -16,6 +16,7 @@ class StatisticSpider(scrapy.Spider):
 
     driver = webdriver.PhantomJS()
     driver.get(start_urls[0])
+    product_id = re.findall('productId=(\d+)', start_urls[0])[0]
 
     def parse(self, response):
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])

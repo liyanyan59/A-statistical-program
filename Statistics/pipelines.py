@@ -9,6 +9,7 @@ from scrapy import Request
 # from twisted.enterprise import adbapi
 # from Statistics import settings
 from openpyxl import Workbook
+from Statistics.spiders.statistic import StatisticSpider
 
 
 class ExcelPipeline(object):
@@ -25,7 +26,7 @@ class ExcelPipeline(object):
         # 将数据添加到xlsx中
         self.ws.append(line)
         # 保存xlsx文件
-        self.wb.save('E:/Statistics/statistics.xlsx')
+        self.wb.save('E:/Statistics/%s.xlsx' % StatisticSpider.product_id)
         return item
 
 
@@ -34,10 +35,9 @@ class ImagePipeline(ImagesPipeline):
         if item[item.IMAGE_URLS]:
             for url in item[item.IMAGE_URLS]:
                 yield Request(url)
-    #
-    # def file_path(self, request, response=None, info=None):
-    #     # image_guid = request.url.split('/')[-1]
-    #     return 'img/'
+
+    def file_path(self, request, response=None, info=None):
+        return '/%s/%s' % (StatisticSpider.product_id, request.url.split('/')[-1])
 
 
 # class StatisticsPipeline:
