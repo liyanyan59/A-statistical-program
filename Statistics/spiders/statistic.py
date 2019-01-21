@@ -20,8 +20,8 @@ class StatisticSpider(scrapy.Spider):
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
                            'productId=%s&ownerMemberId=235021169' % productId]
 
-        driver = webdriver.PhantomJS()
-        driver.get(self.start_urls[0])
+        self.driver = webdriver.PhantomJS()
+        self.driver.get(self.start_urls[0])
 
     def parse(self, response):
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
