@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
-
+import tkinter
 import scrapy
 from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
 import time
 from scrapy.selector import Selector
+from tkinter import *
 
 class StatisticSpider(scrapy.Spider):
     name = 'statistic'
@@ -13,6 +14,14 @@ class StatisticSpider(scrapy.Spider):
     start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?productId=32956338726'
                   '&ownerMemberId=235021169&companyId=244265688&memberType=seller&startValidDate=&i18n=true']
 
+    top = Tk()
+    L1 = Label(top, text="网站名")
+    L1.pack(side=LEFT)
+    E1 = Entry(top, bd=5)
+    start = E1.get()
+    E1.pack(side=RIGHT)
+
+    top.mainloop()
     driver = webdriver.PhantomJS()
     driver.get(start_urls[0])
 
