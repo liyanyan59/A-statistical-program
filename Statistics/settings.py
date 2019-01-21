@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'Statistics.pipelines.StatisticsPipeline': 300,
+   'Statistics.pipelines.ExcelPipeline': 300,
     'Statistics.pipelines.ImagePipeline': 300,
 }
 
@@ -95,4 +95,5 @@ MYSQL_USER = 'root'
 MYSQL_PORT = 3306
 MYSQL_PASSWORD = 'root'
 
-IMAGES_STORE = 'E:/scrapy-spider/Statistics/img'
+IMAGES_STORE = 'E:/Statistics'
+FILES_STORE = 'E:/Statistics'
