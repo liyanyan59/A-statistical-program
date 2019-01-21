@@ -7,6 +7,7 @@ from selenium import webdriver
 import time
 from scrapy.selector import Selector
 
+
 class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
@@ -33,6 +34,10 @@ class StatisticSpider(scrapy.Spider):
 
             # 国家
             countries = response.xpath('//div[@class="user-country"]/b/text()').extract()
+
+            # 图片
+            image_urls = response.xpath('//ul[@class="util-clearfix"]/li/img/@src').extract()
+
             for i in range(10):
 
                 item = Item()
@@ -55,11 +60,18 @@ class StatisticSpider(scrapy.Spider):
                 # 国家
                 country = countries[i]
 
+                # 图片
+                if i == 0:
+                    item[Item.IMAGE_URLS] = image_urls
+                else:
+                    item[Item.IMAGE_URLS] = None
+
                 item[Item.CAPACITY] = capacity
                 item[Item.COLOR] = color
                 item[Item.LOGISTICS] = logistics
                 item[Item.DATETIME] = datetime
                 item[Item.COUNTRY] = country
+
 
                 yield item
 

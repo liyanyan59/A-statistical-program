@@ -64,9 +64,10 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'Statistics.pipelines.StatisticsPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'Statistics.pipelines.StatisticsPipeline': 300,
+    'Statistics.pipelines.ImagePipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +89,10 @@ ROBOTSTXT_OBEY = False
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+MYSQL_DB_NAME = 'ofweek'
+MYSQL_HOST = 'localhost'
+MYSQL_USER = 'root'
+MYSQL_PORT = 3306
+MYSQL_PASSWORD = 'root'
+
+IMAGES_STORE = 'E:/scrapy-spider/Statistics/img'
