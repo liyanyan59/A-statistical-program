@@ -91,9 +91,9 @@ class StatisticSpider(scrapy.Spider):
 
         self.driver.close()
 
-
-# 创建一个进程
-process = CrawlerProcess(get_project_settings())
-# 'followall' is the name of one of the spiders of the project.
-process.crawl(StatisticSpider)  # 避开命令行
-process.start()
+#
+# # 创建一个进程
+# process = CrawlerProcess(get_project_settings())
+# # 'followall' is the name of one of the spiders of the project.
+# process.crawl(StatisticSpider)  # 避开命令行
+# process.start()
