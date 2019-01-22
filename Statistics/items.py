@@ -17,6 +17,7 @@ class StatisticsItem(scrapy.Item):
     datetime = scrapy.Field()
     country = scrapy.Field()
     image_urls = scrapy.Field()  # 图片
+    product_id = scrapy.Field()
 
     CAPACITY = 'capacity'
     COLOR = 'color'
@@ -24,3 +25,4 @@ class StatisticsItem(scrapy.Item):
     DATETIME = 'datetime'
     COUNTRY = 'country'
     IMAGE_URLS = 'image_urls'
+    PRODUCT_ID = 'product_id'

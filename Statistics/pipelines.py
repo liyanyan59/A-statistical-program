@@ -4,13 +4,13 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import os
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
 # from twisted.enterprise import adbapi
 # from Statistics import settings
 from openpyxl import Workbook
-from Statistics.spiders.statistic import StatisticSpider
-
+from Statistics.items import StatisticsItem as Item
 
 class ExcelPipeline(object):
     def __init__(self):
@@ -25,19 +25,22 @@ class ExcelPipeline(object):
         line = [item[item.CAPACITY], item[item.COLOR], item[item.LOGISTICS], item[item.DATETIME], item[item.COUNTRY]]
         # 将数据添加到xlsx中
         self.ws.append(line)
+        desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
         # 保存xlsx文件
-        self.wb.save('E:/Statistics/%s.xlsx' % StatisticSpider.product_id)
+        self.wb.save(desktop+'/%s/%s.xlsx' % (item[item.PRODUCT_ID], item[item.PRODUCT_ID]))
         return item
 
 
 class ImagePipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
+        self.product_id = item[item.PRODUCT_ID]
         if item[item.IMAGE_URLS]:
             for url in item[item.IMAGE_URLS]:
                 yield Request(url)
 
     def file_path(self, request, response=None, info=None):
-        return '/%s/%s' % (StatisticSpider.product_id, request.url.split('/')[-1])
+        desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
+        return desktop+'/%s/%s' % (self.product_id, request.url.split('/')[-1])
 
 
 # class StatisticsPipeline:

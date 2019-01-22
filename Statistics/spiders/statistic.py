@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
 
+import re
 import scrapy
 from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
 import time
 from scrapy.selector import Selector
-from tkinter import *
-
 from Statistics.util.tools import get_product_id
-
 
 
 class StatisticSpider(scrapy.Spider):
@@ -17,12 +17,14 @@ class StatisticSpider(scrapy.Spider):
 
     def __init__(self):
 
-        productId = get_product_id()
+        self.product_id = get_product_id()
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
-                           'productId=%s&ownerMemberId=235021169' % productId]
+                           'productId=%s&ownerMemberId=235021169' % self.product_id]
 
         self.driver = webdriver.PhantomJS()
         self.driver.get(self.start_urls[0])
+
+
 
     def parse(self, response):
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
@@ -50,7 +52,7 @@ class StatisticSpider(scrapy.Spider):
 
                 # 容量
                 capacity = capacities[i].xpath('string(.)').extract_first()
-                capacity = re.search("\d{3}-\d{3}ml", capacity).group(0)
+                capacity = re.search("\d+-\d+ml", capacity).group(0)
 
                 # 颜色
                 color = colors[i].xpath('string(.)').extract_first()
@@ -77,6 +79,7 @@ class StatisticSpider(scrapy.Spider):
                 item[Item.LOGISTICS] = logistics
                 item[Item.DATETIME] = datetime
                 item[Item.COUNTRY] = country
+                item[Item.PRODUCT_ID] = self.product_id
 
                 yield item
 
@@ -87,3 +90,10 @@ class StatisticSpider(scrapy.Spider):
             response = Selector(text=response)
 
         self.driver.close()
+
+
+# 创建一个进程
+process = CrawlerProcess(get_project_settings())
+# 'followall' is the name of one of the spiders of the project.
+process.crawl(StatisticSpider)  # 避开命令行
+process.start()
