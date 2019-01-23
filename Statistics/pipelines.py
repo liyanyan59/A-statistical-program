@@ -12,6 +12,7 @@ from scrapy import Request
 from openpyxl import Workbook
 from Statistics.items import StatisticsItem as Item
 
+
 class ExcelPipeline(object):
     def __init__(self):
         # 创建excel，填写表头
@@ -27,7 +28,7 @@ class ExcelPipeline(object):
         self.ws.append(line)
         desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
         # 保存xlsx文件
-        self.wb.save(desktop+'/%s/%s.xlsx' % (item[item.PRODUCT_ID], item[item.PRODUCT_ID]))
+        self.wb.save(desktop+'/%s.xlsx' % (item[item.PRODUCT_ID]))
         return item
 
 
@@ -40,7 +41,7 @@ class ImagePipeline(ImagesPipeline):
 
     def file_path(self, request, response=None, info=None):
         desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
-        return desktop+'/%s/%s' % (self.product_id, request.url.split('/')[-1])
+        return desktop+'\\%s\\%s' % (self.product_id, request.url.split('/')[-1])
 
 
 # class StatisticsPipeline:

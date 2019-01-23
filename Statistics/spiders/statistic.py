@@ -15,9 +15,10 @@ class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self):
-
-        self.product_id = get_product_id()
+    def __init__(self, url=None, *args, **kwargs): #
+        super(StatisticSpider, self).__init__(*args, **kwargs)
+        self.product_id = re.findall("productId=(\d+)", url)[0]
+        # self.product_id = get_product_id()
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
                            'productId=%s&ownerMemberId=235021169' % self.product_id]
 
@@ -91,7 +92,7 @@ class StatisticSpider(scrapy.Spider):
 
         self.driver.close()
 
-#
+
 # # 创建一个进程
 # process = CrawlerProcess(get_project_settings())
 # # 'followall' is the name of one of the spiders of the project.

@@ -12,7 +12,8 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 hiddenimports = (collect_submodules('scrapy') +
                  collect_submodules('scrapy.pipelines') +
                  collect_submodules('scrapy.extensions') +
-                 collect_submodules('scrapy.utils')+collect_submodules('scrapy.spiders')
+                 collect_submodules('scrapy.utils')+collect_submodules('scrapy.spiders')+
+                 collect_submodules('six')
 )
 #加载数据
 datas = collect_data_files('scrapy')
