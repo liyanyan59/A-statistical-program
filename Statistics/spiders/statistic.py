@@ -8,17 +8,59 @@ from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
 import time
 from scrapy.selector import Selector
-from Statistics.util.tools import get_product_id
+from tkinter import *
+from tkinter import messagebox
+
+import os
+
+
+def get_product_id():
+    base_url = get_base_url()
+    product_id = re.findall("productId=(\d+)", base_url)
+    while not product_id:
+        top = Tk()
+        top.attributes("-alpha", 0)
+        messagebox.showinfo(title="重新输入!", message="您输入了一个错误连接!")
+        top.destroy()
+
+        base_url = get_base_url()
+        product_id = re.findall("productId=(\d+)", base_url)
+    product_id = int(product_id[0])
+    return product_id
+
+
+def get_base_url():
+    def close_callback():
+        os._exit(0)
+    top = Tk()
+    top.geometry('650x230')
+
+    L1 = Label(top, text="输入网站")
+    L1.place(x=14, y=50)
+    e = StringVar()
+    text = Entry(top, textvariable=e, width=180)
+    text.place(x=14, y=80)
+    B = Button(top, text="确认", command=lambda: top.destroy())
+    B.place(x=14, y=150)
+    # text.bind('<Return>', get_text())
+    # text.pack()
+    text.focus_set()
+    top.protocol("WM_DELETE_WINDOW", close_callback)
+    top.mainloop()
+
+    base_url = e.get()
+
+    return base_url
 
 
 class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self, url=None, *args, **kwargs): #
-        super(StatisticSpider, self).__init__(*args, **kwargs)
-        self.product_id = re.findall("productId=(\d+)", url)[0]
-        # self.product_id = get_product_id()
+    def __init__(self):  # , url=None, *args, **kwargs
+        # super(StatisticSpider, self).__init__(*args, **kwargs)
+        # self.product_id = re.findall("productId=(\d+)", url)[0]
+        self.product_id = get_product_id()
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
                            'productId=%s&ownerMemberId=235021169' % self.product_id]
 
@@ -93,8 +135,8 @@ class StatisticSpider(scrapy.Spider):
         self.driver.close()
 
 
-# # 创建一个进程
-# process = CrawlerProcess(get_project_settings())
-# # 'followall' is the name of one of the spiders of the project.
-# process.crawl(StatisticSpider)  # 避开命令行
-# process.start()
+# 创建一个进程
+process = CrawlerProcess(get_project_settings())
+# 'followall' is the name of one of the spiders of the project.
+process.crawl(StatisticSpider)  # 避开命令行
+process.start()
