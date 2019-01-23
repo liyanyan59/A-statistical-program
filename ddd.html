@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>统计文件获取</title>
+</head>
+<!DOCTYPE html>
+
+<body>
+
+
+<br>
+输入网址:<br><br>
+<input class="input-box" type="text">
+<br><br>
+<input id="w" type="button" value="提交" onclick="getInputVal()">
+<br><br>
+<p>状态:</p>
+<br><br>
+<a href="http://171.188.96.**:****" target="_blank">点击下载</a>
+
+
+<p class="content"></p>
+<script>
+		function getInputVal(){
+			const inputBox = document.querySelectorAll('.input-box')[0],
+				  content = document.querySelectorAll('.content')[0],
+                  a= document.querySelectorAll('a')[0];
+			// 获取input输入框中的值
+
+			let inputVal = inputBox.value;
+            let url = inputBox.value;
+			if(inputVal){
+				content.innerHTML = inputVal;
+                a.href="????"+inputVal;
+                window.open('http://docs.jinkan.org/docs/jinja2/_static/jinja-small.png');
+			}else{
+				alert('请在input输入框中填点东西');
+			}
+
+
+		}
+	</script>
+</body>
+</html>
