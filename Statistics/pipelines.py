@@ -4,47 +4,57 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import os
-import zipfile
+import tarfile
 
+import os
 from scrapy.pipelines.images import ImagesPipeline
-from scrapy import Request
+from scrapy import Request, signals
 # from twisted.enterprise import adbapi
 from Statistics import settings
 from openpyxl import Workbook
 
 
+#
 class StatisticsPipeline(object):
 
-    def process_item(self, item, spider):
+    @classmethod
+    def from_crawler(cls, crawler):
+        pipeline = cls()
+        crawler.signals.connect(pipeline.spider_opened, signals.spider_opened)
+        crawler.signals.connect(pipeline.spider_closed, signals.spider_closed)
+        return pipeline
 
+    def spider_opened(self, spider):
+        self.product_id = spider.product_id
+        self.zipName = settings.FILES_STORE + '/%s.zip' % self.product_id
+        path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
+
+        if not os.path.exists(path):
+            os.mkdir(settings.IMAGES_STORE + '/%s' % self.product_id)
+        file = open(path, 'w')
+        file.close()
+
+    # spider关闭时的逻辑
+    def spider_closed(self, spider):
+        self.adddirfile()
+
+    def process_item(self, item, spider):
         return item
 
-    def open_spider(self, spider):
-        # 创建zip文件
-        pass
-
-    def close_spider(self, item, spider):
-        self.product_id = item[item.PRODUCT_ID]
-        self.adddirfile()
-        self.addzip()
-        pass
-
-    def addzip(self):
-        f = zipfile.ZipFile(settings.FILES_STORE+'%s.zip' % self.product_id, 'w', zipfile.ZIP_DEFLATED)
-        f.write(settings.FILES_STORE+'%s.xlsx' % self.product_id)
-        f.close()
-    pass
-
     # 把整个文件夹内的文件打包
-
     def adddirfile(self):
-        f = zipfile.ZipFile(settings.FILES_STORE+'%s.zip' % self.product_id, 'w', zipfile.ZIP_DEFLATED)
-        startdir = settings.FILES_STORE+"%s" % self.product_id  # image folder
-        for dirpath, dirnames, filenames in os.walk(startdir):
-            for filename in filenames:
-                f.write(os.path.join(dirpath, filename))
-        f.close()
+        # f = zipfile.ZipFile(settings.IMAGES_STORE + '/%s.zip' % self.product_id, 'w', zipfile.ZIP_DEFLATED)
+        #
+        startdir = settings.IMAGES_STORE + "/%s" % self.product_id  # image folder
+        # files = os.listdir(startdir)  # 得到文件夹下的所有文件名称
+        # for file in files:
+        #     print(os.path.abspath(file))
+        #     self.f.write(os.path.abspath(file))
+        #
+        # f.close()
+        tf = tarfile.open(self.zipName, 'w:gz')
+        tf.add(startdir)
+        tf.close()
 
 
 class ExcelPipeline(object):
@@ -56,14 +66,20 @@ class ExcelPipeline(object):
         self.ws.append(['CAPACITY', 'COLOR', 'LOGISTICS', 'DATETIME', 'COUNTRY'])
 
     def process_item(self, item, spider):
+        self.product_id = item[item.PRODUCT_ID]
+        path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
+        if not os.path.exists(path):
+            file = open(path, 'w')
+            file.close()
         # 整理每一项（行）数据
         line = [item[item.CAPACITY], item[item.COLOR], item[item.LOGISTICS], item[item.DATETIME], item[item.COUNTRY]]
         # 将数据添加到xlsx中
         self.ws.append(line)
-        # desktop = os.path.join(os.path.expanduser("~"), 'Desktop')
         # 保存xlsx文件
-        self.wb.save(settings.FILES_STORE+'/%s.xlsx' % (item[item.PRODUCT_ID]))
+        self.wb.save(path)
         return item
+
+
 
 
 class ImagePipeline(ImagesPipeline):

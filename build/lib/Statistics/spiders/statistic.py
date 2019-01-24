@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-from scrapy.crawler import CrawlerProcess
-from scrapy.utils.project import get_project_settings
+# from scrapy.crawler import CrawlerProcess
+# from scrapy.utils.project import get_project_settings
 
 import re
 import scrapy
+from scrapy import signals
+import os
+import zipfile
+
 from Statistics.items import StatisticsItem as Item
+from Statistics import settings
 from selenium import webdriver
 import time
 from scrapy.selector import Selector
@@ -57,16 +62,19 @@ class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self, url=None, *args, **kwargs):
+    def __init__(self, url=None, *args, **kwargs):  #
         super(StatisticSpider, self).__init__(*args, **kwargs)
-        self.product_id = re.findall("productId=(\d+)", url)[0]
-        # self.product_id = get_product_id()
+        # url = 'https://www.aliexpress.com/item/OUOH-2017-New-500ML-Creative-Collapsible-Foldable-Silicone-drink-Sports-Water-Bottle-Camping-Travel-bicycle-bottle/32792915807.html?spm=2114.10010108.1000014.3.e85f5795ASt5Gp&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.13338.110449.000000000000000&scm_id=1007.13338.110449.000000000000000&scm-url=1007.13338.110449.000000000000000&pvid=b19d41c1-fc7e-4371-8337-87075b7644a7'
+        if re.findall("productId=(\d+)", url):
+            self.product_id = re.findall("productId=(\d+)", url)[0]
+        else:
+            self.product_id = re.findall("(\d+).html", url)[0]
+
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
                            'productId=%s&ownerMemberId=235021169' % self.product_id]
 
         self.driver = webdriver.PhantomJS()
         self.driver.get(self.start_urls[0])
-
 
 
     def parse(self, response):
@@ -90,12 +98,12 @@ class StatisticSpider(scrapy.Spider):
             # 图片
             image_urls = response.xpath('//ul[@class="util-clearfix"]/li/img/@src').extract()
 
-            for i in range(10):
+            for i in range(len(countries)):
                 item = Item()
 
                 # 容量
                 capacity = capacities[i].xpath('string(.)').extract_first()
-                capacity = re.search("\d+-\d+ml", capacity).group(0)
+                # capacity = re.search("\d+-\d+ml", capacity).group(0)
 
                 # 颜色
                 color = colors[i].xpath('string(.)').extract_first()
@@ -125,12 +133,14 @@ class StatisticSpider(scrapy.Spider):
                 item[Item.PRODUCT_ID] = self.product_id
 
                 yield item
+            if response.xpath('//a[contains(text(),"Next")]'):
+                time.sleep(3)
+                self.driver.find_element_by_xpath('//a[contains(text(),"Next")]').click()
 
-            self.driver.find_element_by_xpath('//a[contains(text(),"Next")]').click()
-
-            time.sleep(3)
-            response = self.driver.page_source
-            response = Selector(text=response)
+                response = self.driver.page_source
+                response = Selector(text=response)
+            else:
+                break
 
         self.driver.close()
 

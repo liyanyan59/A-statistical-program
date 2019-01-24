@@ -6,8 +6,8 @@ Statistics/main.py
 Statistics/middlewares.py
 Statistics/pipelines.py
 Statistics/settings.py
+Statistics/test.py
 Statistics/spiders/__init__.py
-Statistics/spiders/scrapy-hook.py
 Statistics/spiders/statistic.py
 project.egg-info/PKG-INFO
 project.egg-info/SOURCES.txt

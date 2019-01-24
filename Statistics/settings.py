@@ -67,7 +67,7 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
     'Statistics.pipelines.ExcelPipeline': 300,
     'Statistics.pipelines.ImagePipeline': 300,
-    'Statistics.pipelines.StatisticsPipeline': 300,
+    'Statistics.pipelines.StatisticsPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
