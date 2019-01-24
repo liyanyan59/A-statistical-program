@@ -27,7 +27,7 @@ class StatisticsPipeline(object):
     def close_spider(self, item, spider):
         self.product_id = item[item.PRODUCT_ID]
         self.adddirfile()
-        self.addzip()
+        # self.addzip()
         pass
 
     def addzip(self):
