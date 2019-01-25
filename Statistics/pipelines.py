@@ -26,7 +26,7 @@ class StatisticsPipeline(object):
 
     def spider_opened(self, spider):
         self.product_id = spider.product_id
-        self.zipName = settings.FILES_STORE + '/%s.zip' % self.product_id
+        self.zipName = settings.IMAGES_STORE + '/%s.zip' % self.product_id
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
 
         if not os.path.exists(path):
@@ -68,9 +68,6 @@ class ExcelPipeline(object):
     def process_item(self, item, spider):
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
-        if not os.path.exists(path):
-            file = open(path, 'w')
-            file.close()
         # 整理每一项（行）数据
         line = [item[item.CAPACITY], item[item.COLOR], item[item.LOGISTICS], item[item.DATETIME], item[item.COUNTRY]]
         # 将数据添加到xlsx中
@@ -78,8 +75,6 @@ class ExcelPipeline(object):
         # 保存xlsx文件
         self.wb.save(path)
         return item
-
-
 
 
 class ImagePipeline(ImagesPipeline):
