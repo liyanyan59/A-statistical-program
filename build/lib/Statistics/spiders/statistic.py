@@ -4,12 +4,8 @@
 
 import re
 import scrapy
-from scrapy import signals
-import os
-import zipfile
 
 from Statistics.items import StatisticsItem as Item
-from Statistics import settings
 from selenium import webdriver
 import time
 from scrapy.selector import Selector
@@ -73,7 +69,11 @@ class StatisticSpider(scrapy.Spider):
         self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
                            'productId=%s&ownerMemberId=235021169' % self.product_id]
 
-        self.driver = webdriver.PhantomJS()
+        option = webdriver.ChromeOptions()
+        option.add_argument("--headless")
+        option.add_argument('--no-sandbox')
+        option.add_argument('--disable-gpu')
+        self.driver = webdriver.Chrome(chrome_options=option)
         self.driver.get(self.start_urls[0])
 
 

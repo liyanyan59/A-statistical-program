@@ -4,9 +4,9 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import tarfile
-
 import os
+import zipfile
+
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request, signals
 # from twisted.enterprise import adbapi
@@ -26,7 +26,7 @@ class StatisticsPipeline(object):
 
     def spider_opened(self, spider):
         self.product_id = spider.product_id
-        self.zipName = settings.FILES_STORE + '/%s.zip' % self.product_id
+        self.zipName = settings.IMAGES_STORE + '/%s.zip' % self.product_id
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
 
         if not os.path.exists(path):
@@ -52,9 +52,14 @@ class StatisticsPipeline(object):
         #     self.f.write(os.path.abspath(file))
         #
         # f.close()
-        tf = tarfile.open(self.zipName, 'w:gz')
-        tf.add(startdir)
-        tf.close()
+        file_news = startdir + '.zip'  # 压缩后文件夹的名字
+        z = zipfile.ZipFile(file_news, 'w', zipfile.ZIP_DEFLATED)  # 参数一：文件夹名
+        for dirpath, dirnames, filenames in os.walk(startdir):
+            fpath = dirpath.replace(startdir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
+            fpath = fpath and fpath + os.sep or ''  # 这句话理解我也点郁闷，实现当前文件夹以及包含的所有文件的压缩
+            for filename in filenames:
+                z.write(os.path.join(dirpath, filename), fpath + filename)
+        z.close()
 
 
 class ExcelPipeline(object):
@@ -68,9 +73,6 @@ class ExcelPipeline(object):
     def process_item(self, item, spider):
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
-        if not os.path.exists(path):
-            file = open(path, 'w')
-            file.close()
         # 整理每一项（行）数据
         line = [item[item.CAPACITY], item[item.COLOR], item[item.LOGISTICS], item[item.DATETIME], item[item.COUNTRY]]
         # 将数据添加到xlsx中
@@ -78,8 +80,6 @@ class ExcelPipeline(object):
         # 保存xlsx文件
         self.wb.save(path)
         return item
-
-
 
 
 class ImagePipeline(ImagesPipeline):

@@ -13,29 +13,23 @@ import settings
 
 class OPO:
     def main(self):
-        self.product_id = 11111
-        file = open(settings.FILES_STORE + '/%s.xlsx' % self.product_id, 'w')
-        file.close()
-        self.f = zipfile.ZipFile(settings.FILES_STORE + '/%s.zip' % self.product_id, 'w', zipfile.ZIP_DEFLATED)
         self.adddirfile()
-        self.addzip()
-        self.f.close()
 
-
-
-    def addzip(self):
-        f = zipfile.ZipFile(settings.FILES_STORE + '%s.zip' % self.product_id, 'w', zipfile.ZIP_DEFLATED)
-        f.write(settings.FILES_STORE + '/%s.xlsx' % self.product_id)
-        f.close()
 
 
     # 把整个文件夹内的文件打包
 
     def adddirfile(self):
-        startdir = settings.FILES_STORE + "%s" % self.product_id  # image folder
+        startdir = "E:\\Statistics\\32956338726"  # 要压缩的文件夹路径
+        file_news = startdir + '.zip'  # 压缩后文件夹的名字
+        z = zipfile.ZipFile(file_news, 'w', zipfile.ZIP_DEFLATED)  # 参数一：文件夹名
         for dirpath, dirnames, filenames in os.walk(startdir):
+            fpath = dirpath.replace(startdir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
+            fpath = fpath and fpath + os.sep or ''  # 这句话理解我也点郁闷，实现当前文件夹以及包含的所有文件的压缩
             for filename in filenames:
-                self.f.write(os.path.join(dirpath, filename))
+                z.write(os.path.join(dirpath, filename), fpath + filename)
+        z.close()
+
 
 if __name__=="__main__":
     OPO().main()
