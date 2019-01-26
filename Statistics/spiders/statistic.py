@@ -60,7 +60,7 @@ class StatisticSpider(scrapy.Spider):
 
     def __init__(self):  # , url=None, *args, **kwargs
         # super(StatisticSpider, self).__init__(*args, **kwargs)
-        url = 'https://www.aliexpress.com/item/OLAF-Type-C-90-Degree-Fast-Charging-usb-c-cable-Type-c-data-Cord-For-Samsung/32965241728.html?spm=2114.10010108.1000014.16.5c92113ff2DybL&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.13338.110449.000000000000000&scm_id=1007.13338.110449.000000000000000&scm-url=1007.13338.110449.000000000000000&pvid=0f887920-03ba-4e72-b725-4f567b4e9984'
+        url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
         if re.findall("productId=(\d+)", url):
             self.product_id = re.findall("productId=(\d+)", url)[0]
         else:
@@ -78,19 +78,20 @@ class StatisticSpider(scrapy.Spider):
 
     def parse(self, response):
         if not response.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
-            self.parse_detail(response)
+            yield scrapy.Request(url=response.url, callback=self.parse_detail)
         else:
             elem = response.xpath('//a[@class="fb-sort-list-href"]')
             if elem:
                 self.driver.find_element_by_xpath('//a[@class="fb-sort-list-href"]').click()
-                response = Selector(text=self.driver.page_source)
-                if response.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
+                res = Selector(text=self.driver.page_source)
+                if res.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
                     pass
                 else:
-                    self.parse_detail(response)
-
+                    yield scrapy.Request(url=response.url, callback=self.parse_detail, meta={'res': res})
 
     def parse_detail(self, response):
+        if response.meta:
+            response = response.meta['res']
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
         for page in range(totalpage):
             # 容量
