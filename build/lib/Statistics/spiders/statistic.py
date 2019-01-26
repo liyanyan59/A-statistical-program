@@ -103,6 +103,7 @@ class StatisticSpider(scrapy.Spider):
 
                 # 容量
                 capacity = capacities[i].xpath('string(.)').extract_first()
+                capacity = capacity.replace('\t', '').replace('\n', '')
                 # capacity = re.search("\d+-\d+ml", capacity).group(0)
 
                 # 颜色
