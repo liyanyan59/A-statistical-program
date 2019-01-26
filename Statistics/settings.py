@@ -65,9 +65,9 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'Statistics.pipelines.ExcelPipeline': 300,
-    'Statistics.pipelines.ImagePipeline': 300,
-    'Statistics.pipelines.StatisticsPipeline': 200,
+    # 'Statistics.pipelines.ExcelPipeline': 300,
+    # 'Statistics.pipelines.ImagePipeline': 300,
+    # 'Statistics.pipelines.StatisticsPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
