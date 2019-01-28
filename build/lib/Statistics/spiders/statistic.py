@@ -58,9 +58,9 @@ class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self, url=None, *args, **kwargs):  #
-        super(StatisticSpider, self).__init__(*args, **kwargs)
-        # url = 'https://www.aliexpress.com/item/OUOH-2017-New-500ML-Creative-Collapsible-Foldable-Silicone-drink-Sports-Water-Bottle-Camping-Travel-bicycle-bottle/32792915807.html?spm=2114.10010108.1000014.3.e85f5795ASt5Gp&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.13338.110449.000000000000000&scm_id=1007.13338.110449.000000000000000&scm-url=1007.13338.110449.000000000000000&pvid=b19d41c1-fc7e-4371-8337-87075b7644a7'
+    def __init__(self):  # , url=None, *args, **kwargs
+        # super(StatisticSpider, self).__init__(*args, **kwargs)
+        url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
         if re.findall("productId=(\d+)", url):
             self.product_id = re.findall("productId=(\d+)", url)[0]
         else:
@@ -76,8 +76,22 @@ class StatisticSpider(scrapy.Spider):
         self.driver = webdriver.Chrome(chrome_options=option)
         self.driver.get(self.start_urls[0])
 
-
     def parse(self, response):
+        if not response.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
+            yield scrapy.Request(url=response.url, callback=self.parse_detail)
+        else:
+            elem = response.xpath('//a[@class="fb-sort-list-href"]')
+            if elem:
+                self.driver.find_element_by_xpath('//a[@class="fb-sort-list-href"]').click()
+                res = Selector(text=self.driver.page_source)
+                if res.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
+                    pass
+                else:
+                    yield scrapy.Request(url=response.url, callback=self.parse_detail, meta={'res': res})
+
+    def parse_detail(self, response):
+        if response.meta:
+            response = response.meta['res']
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
         for page in range(totalpage):
             # 容量
@@ -103,7 +117,7 @@ class StatisticSpider(scrapy.Spider):
 
                 # 容量
                 capacity = capacities[i].xpath('string(.)').extract_first()
-                capacity = capacity.replace('\t', '').replace('\n', '')
+                capacity = capacity.replace('\\t', '').replace('\\n', '')
                 # capacity = re.search("\d+-\d+ml", capacity).group(0)
 
                 # 颜色
