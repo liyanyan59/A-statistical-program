@@ -3,7 +3,10 @@
 # from scrapy.utils.project import get_project_settings
 
 import re
+from urllib.parse import urljoin
+
 import scrapy
+from selenium.webdriver.common.keys import Keys
 
 from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
@@ -58,27 +61,35 @@ class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self):  # , url=None, *args, **kwargs
-        # super(StatisticSpider, self).__init__(*args, **kwargs)
-        url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
+    def __init__(self, url=None, *args, **kwargs):  #
+        super(StatisticSpider, self).__init__(*args, **kwargs)
+        # url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
+
         if re.findall("productId=(\d+)", url):
             self.product_id = re.findall("productId=(\d+)", url)[0]
         else:
             self.product_id = re.findall("(\d+).html", url)[0]
 
-        self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
-                           'productId=%s&ownerMemberId=235021169' % self.product_id]
+        #
+        # self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
+        #                    'productId=%s&ownerMemberId=235021169' % self.product_id]
 
         option = webdriver.ChromeOptions()
         option.add_argument("--headless")
         option.add_argument('--no-sandbox')
         option.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome(chrome_options=option)
-        self.driver.get(self.start_urls[0])
+        self.driver.get(url)
+        res = Selector(text=self.driver.page_source)
+        url = res.xpath('//iframe[contains(@thesrc,"feedback.aliexpress.com")]/@thesrc').extract_first()
+        url = urljoin('https://feedback.aliexpress.com', url)
+        self.start_urls = []
+        self.start_urls.append(url)
 
     def parse(self, response):
+
         if not response.xpath('//div[@class="no-feedback wholesale-product-feedback"]'):
-            yield scrapy.Request(url=response.url, callback=self.parse_detail)
+            yield scrapy.Request(url=response.url, callback=self.parse_detail, meta={'res': response})
         else:
             elem = response.xpath('//a[@class="fb-sort-list-href"]')
             if elem:
@@ -94,14 +105,16 @@ class StatisticSpider(scrapy.Spider):
             response = response.meta['res']
         totalpage = int(response.xpath('//label[@class="ui-label"]/text()').extract_first().split('/')[-1])
         for page in range(totalpage):
-            # 容量
-            capacities = response.xpath('//span[@class="first"]')
+            # # 容量
+            # capacities = response.xpath('//span[@class="first"]')
+            #
+            # # 颜色
+            # colors = response.xpath('//span[contains(string(.),"Color")]')
+            #
+            # # 物流
+            # Logistics = response.xpath('//span[contains(string(.),"Logistics")]')
 
-            # 颜色
-            colors = response.xpath('//span[contains(string(.),"Color")]')
-
-            # 物流
-            Logistics = response.xpath('//span[contains(string(.),"Logistics")]')
+            infos = response.xpath('//div[@class="user-order-info"]')
 
             # 日期时间
             datetimes = response.xpath('//dl[@class="buyer-review"]/dd[@class="r-time"]/text()').extract()
@@ -115,20 +128,29 @@ class StatisticSpider(scrapy.Spider):
             for i in range(len(countries)):
                 item = Item()
 
-                # 容量
-                capacity = capacities[i].xpath('string(.)').extract_first()
-                capacity = capacity.replace('\\t', '').replace('\\n', '')
-                # capacity = re.search("\d+-\d+ml", capacity).group(0)
+                # # 容量
+                # capacity = capacities[i].xpath('string(.)').extract_first()
+                # capacity = capacity.replace('\\t', '').replace('\\n', '')
+                # # capacity = re.search("\d+-\d+ml", capacity).group(0)
+                #
+                # # 颜色
+                # color = colors[i].xpath('string(.)').extract_first()
+                # color = color.split(":")[-1].strip()
+                #
+                # # 物流
+                # logistics = Logistics[i].xpath('string(.)').extract_first()
+                # logistics = logistics.split(":")[-1].strip()
 
-                # 颜色
-                color = colors[i].xpath('string(.)').extract_first()
-                color = color.split(":")[-1].strip()
+                spans = infos[i].xpath('span')
+                item[Item.INFOS] = {}
 
-                # 物流
-                logistics = Logistics[i].xpath('string(.)').extract_first()
-                logistics = logistics.split(":")[-1].strip()
+                for span in spans:
+                    key = span.xpath('strong/text()').extract_first().replace(':', '')
+                    value = span.xpath('string(.)').extract_first()
+                    value = value.split(":")[-1].replace('\t', '').replace('\n', '').replace(' ', '')
+                    item[Item.INFOS][key] = value
 
-                # 日期时间
+                    # 日期时间
                 datetime = datetimes[i]
 
                 # 国家
@@ -140,9 +162,9 @@ class StatisticSpider(scrapy.Spider):
                 else:
                     item[Item.IMAGE_URLS] = None
 
-                item[Item.CAPACITY] = capacity
-                item[Item.COLOR] = color
-                item[Item.LOGISTICS] = logistics
+                # item[Item.CAPACITY] = capacity
+                # item[Item.COLOR] = color
+                # item[Item.LOGISTICS] = logistics
                 item[Item.DATETIME] = datetime
                 item[Item.COUNTRY] = country
                 item[Item.PRODUCT_ID] = self.product_id

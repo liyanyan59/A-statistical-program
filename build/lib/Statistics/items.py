@@ -10,18 +10,20 @@ import scrapy
 
 class StatisticsItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    capacity = scrapy.Field()
-    color = scrapy.Field()
-    logistics = scrapy.Field()
+    # # name = scrapy.Field()
+    # capacity = scrapy.Field()
+    # color = scrapy.Field()
+    # logistics = scrapy.Field()
+    infos = scrapy.Field()
     datetime = scrapy.Field()
     country = scrapy.Field()
     image_urls = scrapy.Field()  # 图片
     product_id = scrapy.Field()
 
-    CAPACITY = 'capacity'
-    COLOR = 'color'
-    LOGISTICS = 'logistics'
+    # CAPACITY = 'capacity'
+    # COLOR = 'color'
+    # LOGISTICS = 'logistics'
+    INFOS = 'infos'
     DATETIME = 'datetime'
     COUNTRY = 'country'
     IMAGE_URLS = 'image_urls'

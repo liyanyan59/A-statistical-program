@@ -74,7 +74,11 @@ class ExcelPipeline(object):
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
         # 整理每一项（行）数据
-        line = [item[item.CAPACITY], item[item.COLOR], item[item.LOGISTICS], item[item.DATETIME], item[item.COUNTRY]]
+        line = []
+        for key in item[item.INFOS]:
+            line.append(key)
+        line.append(item[item.DATETIME])
+        line.append(item[item.COUNTRY])
         # 将数据添加到xlsx中
         self.ws.append(line)
         # 保存xlsx文件
