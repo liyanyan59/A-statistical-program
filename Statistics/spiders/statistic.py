@@ -60,9 +60,9 @@ class StatisticSpider(scrapy.Spider):
     name = 'statistic'
     allowed_domains = ['feedback.aliexpress.com']
 
-    def __init__(self, url=None, *args, **kwargs):  #
-        super(StatisticSpider, self).__init__(*args, **kwargs)
-        # url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
+    def __init__(self):  # , url=None, *args, **kwargs
+        # super(StatisticSpider, self).__init__(*args, **kwargs)
+        url = 'https://www.aliexpress.com/item/iHaitun-L-Type-C-Cable-Adapter-For-Huawei-Mate-20-Pro-10-P20-Xiaomi-Splitter-Audio/32960853697.html?spm=a2g01.11146674.layer-iabdzn.13.608bcbb8SgZWdz&gps-id=6046422&scm=1007.16233.92932.0&scm_id=1007.16233.92932.0&scm-url=1007.16233.92932.0&pvid=ecbfc7b2-8313-47b2-bc0a-490c5586757f'
 
         if re.findall("productId=(\d+)", url):
             self.product_id = re.findall("productId=(\d+)", url)[0]
@@ -82,6 +82,8 @@ class StatisticSpider(scrapy.Spider):
         res = Selector(text=self.driver.page_source)
         url = res.xpath('//iframe[contains(@thesrc,"feedback.aliexpress.com")]/@thesrc').extract_first()
         url = urljoin('https://feedback.aliexpress.com', url)
+
+        self.driver.get(url)
         self.start_urls = []
         self.start_urls.append(url)
 
