@@ -76,7 +76,7 @@ class ExcelPipeline(object):
         head.append('DATETIME')
         head.append('COUNTRY')
         for i in range(len(head)):
-            self.ws.cell(row=1, column=i).value = head[i]
+            self.ws.cell(row=1, column=i+1).value = head[i]
         # self.ws.append(head)
 
         self.product_id = item[item.PRODUCT_ID]

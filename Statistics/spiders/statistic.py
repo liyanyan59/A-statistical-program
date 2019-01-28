@@ -171,7 +171,7 @@ class StatisticSpider(scrapy.Spider):
                 yield item
             if response.xpath('//a[contains(text(),"Next")]'):
                 time.sleep(3)
-                self.driver.find_element_by_xpath('//a[contains(text(),"Next")]').click()
+                self.driver.find_element_by_xpath('//div[@class="ui-pagination ui-pagination-front ui-pagination-pager util-right"]/a[contains(text(),"Next")]').click()
 
                 response = self.driver.page_source
                 response = Selector(text=response)
