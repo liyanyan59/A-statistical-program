@@ -75,7 +75,9 @@ class ExcelPipeline(object):
             head.append(key.upper())
         head.append('DATETIME')
         head.append('COUNTRY')
-        self.ws.append(head)
+        for i in range(len(head)):
+            self.ws.cell(row=1, column=i).value = head[i]
+        # self.ws.append(head)
 
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
