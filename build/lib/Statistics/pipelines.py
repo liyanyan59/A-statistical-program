@@ -67,16 +67,22 @@ class ExcelPipeline(object):
         # 创建excel，填写表头
         self.wb = Workbook()
         self.ws = self.wb.active
-        # 设置表头
-        self.ws.append(['CAPACITY', 'COLOR', 'LOGISTICS', 'DATETIME', 'COUNTRY'])
 
     def process_item(self, item, spider):
+        # 设置表头
+        head = []
+        for key in item[item.INFOS]:
+            head.append(key.upper())
+        head.append('DATETIME')
+        head.append('COUNTRY')
+        self.ws.append(head)
+
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
         # 整理每一项（行）数据
         line = []
         for key in item[item.INFOS]:
-            line.append(key)
+            line.append(item[item.INFOS][key])
         line.append(item[item.DATETIME])
         line.append(item[item.COUNTRY])
         # 将数据添加到xlsx中

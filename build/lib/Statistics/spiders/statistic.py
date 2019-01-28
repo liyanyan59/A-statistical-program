@@ -6,7 +6,6 @@ import re
 from urllib.parse import urljoin
 
 import scrapy
-from selenium.webdriver.common.keys import Keys
 
 from Statistics.items import StatisticsItem as Item
 from selenium import webdriver
