@@ -180,8 +180,8 @@ class StatisticSpider(scrapy.Spider):
             else:
                 break
 
-        self.driver.close()
-
+        # self.driver.close()
+        self.driver.quit()
 
 # # 创建一个进程
 # process = CrawlerProcess(get_project_settings())
