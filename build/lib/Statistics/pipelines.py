@@ -27,6 +27,7 @@ class StatisticsPipeline(object):
     def spider_opened(self, spider):
         self.product_id = spider.product_id
         self.zipName = settings.IMAGES_STORE + '/%s.zip' % self.product_id
+        # 创建文件
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
 
         if not os.path.exists(path):
@@ -36,7 +37,13 @@ class StatisticsPipeline(object):
 
     # spider关闭时的逻辑
     def spider_closed(self, spider):
+        # 打包
         self.adddirfile()
+
+        os.system("rm -rf "+settings.IMAGES_STORE+"/%s.t" % self.product_id)  # 删除状态文件
+        # os.system("rm -rf "+settings.IMAGES_STORE+"/%s/" % self.product_id)   # 删除文件夹
+        os.system("killall -9 chrome")
+        os.system("killall -9 chromedriver")  # 回收内存
 
     def process_item(self, item, spider):
         return item
@@ -69,12 +76,20 @@ class ExcelPipeline(object):
         self.ws = self.wb.active
 
     def process_item(self, item, spider):
+
         # 设置表头
         head = []
+
+        if list(self.ws.rows):
+            for cell in list(self.ws.rows)[0]:  # 原有表头
+                head.append(cell.value)   # 为了防止一些数据span数量不同的问题的出现
+
         for key in item[item.INFOS]:
-            head.append(key.upper())
-        head.append('DATETIME')
-        head.append('COUNTRY')
+            if key.upper() not in head:
+                head.append(key.upper())
+        if ('DATETIME' and 'COUNTRY') not in head:
+            head.append('DATETIME')
+            head.append('COUNTRY')
         for i in range(len(head)):
             self.ws.cell(row=1, column=i+1).value = head[i]
         # self.ws.append(head)
@@ -82,11 +97,12 @@ class ExcelPipeline(object):
         self.product_id = item[item.PRODUCT_ID]
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
         # 整理每一项（行）数据
-        line = []
+        line = [''] * len(head)
         for key in item[item.INFOS]:
-            line.append(item[item.INFOS][key])
-        line.append(item[item.DATETIME])
-        line.append(item[item.COUNTRY])
+            line[head.index(key.upper())] = item[item.INFOS][key]
+        line[head.index('DATETIME')] = item[item.DATETIME]
+        line[head.index('COUNTRY')] = item[item.COUNTRY]
+
         # 将数据添加到xlsx中
         self.ws.append(line)
         # 保存xlsx文件

@@ -5,6 +5,7 @@
 import re
 from urllib.parse import urljoin
 
+import os
 import scrapy
 
 from Statistics.items import StatisticsItem as Item
@@ -54,6 +55,7 @@ from scrapy.selector import Selector
 #     base_url = e.get()
 #
 #     return base_url
+from Statistics.settings import IMAGES_STORE
 
 
 class StatisticSpider(scrapy.Spider):
@@ -73,6 +75,7 @@ class StatisticSpider(scrapy.Spider):
         # self.start_urls = ['https://feedback.aliexpress.com/display/productEvaluation.htm?'
         #                    'productId=%s&ownerMemberId=235021169' % self.product_id]
 
+        os.system("touch "+IMAGES_STORE+"/%s.t" % self.product_id)   # 创建状态文件
         option = webdriver.ChromeOptions()
         option.add_argument("--headless")
         option.add_argument('--no-sandbox')

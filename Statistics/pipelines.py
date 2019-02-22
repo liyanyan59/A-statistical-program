@@ -27,10 +27,6 @@ class StatisticsPipeline(object):
     def spider_opened(self, spider):
         self.product_id = spider.product_id
         self.zipName = settings.IMAGES_STORE + '/%s.zip' % self.product_id
-        os.system("touch /root/flask/static/files/%s.t")   # 创建状态文件
-
-    # spider关闭时的逻辑
-    def spider_closed(self, spider):
         # 创建文件
         path = settings.IMAGES_STORE + '/%s/%s.xlsx' % (self.product_id, self.product_id)
 
@@ -39,11 +35,13 @@ class StatisticsPipeline(object):
         file = open(path, 'w')
         file.close()
 
+    # spider关闭时的逻辑
+    def spider_closed(self, spider):
         # 打包
         self.adddirfile()
 
         os.system("rm -rf "+settings.IMAGES_STORE+"/%s.t" % self.product_id)  # 删除状态文件
-        os.system("rm -rf "+settings.IMAGES_STORE+"/%s/" % self.product_id)   # 删除文件夹
+        # os.system("rm -rf "+settings.IMAGES_STORE+"/%s/" % self.product_id)   # 删除文件夹
         os.system("killall -9 chrome")
         os.system("killall -9 chromedriver")  # 回收内存
 
@@ -82,8 +80,9 @@ class ExcelPipeline(object):
         # 设置表头
         head = []
 
-        for cell in list(self.ws.rows)[1]:  # 原有表头
-            head.append(cell.value)   # 为了防止一些数据span数量不同的问题的出现
+        if list(self.ws.rows):
+            for cell in list(self.ws.rows)[0]:  # 原有表头
+                head.append(cell.value)   # 为了防止一些数据span数量不同的问题的出现
 
         for key in item[item.INFOS]:
             if key.upper() not in head:
@@ -100,7 +99,7 @@ class ExcelPipeline(object):
         # 整理每一项（行）数据
         line = [''] * len(head)
         for key in item[item.INFOS]:
-            line[head.index(key)] = item[item.INFOS][key]
+            line[head.index(key.upper())] = item[item.INFOS][key]
         line[head.index('DATETIME')] = item[item.DATETIME]
         line[head.index('COUNTRY')] = item[item.COUNTRY]
 

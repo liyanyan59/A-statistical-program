@@ -92,5 +92,5 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 
-IMAGES_STORE = '/root/env/static/files'
-FILES_STORE = '/root/env/static/files'
+IMAGES_STORE = '/root/flask/static/files'
+FILES_STORE = '/root/flask/static/files'
