@@ -2,6 +2,6 @@
 from scrapy.cmdline import execute
 
 
-execute(['scrapy', 'crawl', 'statistic'])
+execute(['scrapy', 'crawl', 'statistic2'])
 
 

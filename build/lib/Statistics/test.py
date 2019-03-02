@@ -30,6 +30,12 @@ class OPO:
                 z.write(os.path.join(dirpath, filename), fpath + filename)
         z.close()
 
+    def a(self):
+        path = 'G:\\迅雷下载\\1969635228\\1969635228.xlsx'
+
+        file = open(path, 'w')
+        file.close()
+
 
 if __name__=="__main__":
-    OPO().main()
+    OPO().a()

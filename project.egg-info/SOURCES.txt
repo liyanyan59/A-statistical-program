@@ -9,6 +9,7 @@ Statistics/settings.py
 Statistics/test.py
 Statistics/spiders/__init__.py
 Statistics/spiders/statistic.py
+Statistics/spiders/statistic0.1.py
 env/__init__.py
 env/website.py
 env/wsgi.py
